@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: gameshop_db
+    environment:
+      POSTGRES_USER: user # Имя пользователя для базы данных
+      POSTGRES_PASSWORD: password # Пароль для пользователя
+      POSTGRES_DB: gameshop # Имя базы данных
+    ports:
+      - '5432:5432' # Порты для подключения: локальный 5432 и контейнерный 5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Персистентное хранилище данных
+
+volumes:
+  postgres_data: # Персистентный том для данных PostgreSQL
