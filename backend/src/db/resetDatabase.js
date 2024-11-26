@@ -1,58 +1,24 @@
-const { Client } = require('pg')
+const client = require('./dbClient')
 const fs = require('fs')
+const path = require('path')
 
-// Подключение к базе данных
-const client = new Client({
-  user: 'user', // Замените на ваше имя пользователя
-  host: 'localhost',
-  database: 'gameshop', // Замените на вашу базу данных
-  password: 'password', // Замените на ваш пароль
-  port: 5432,
-})
+const cleanFilePath = path.join(__dirname, '../migrations/clean.sql')
 
-async function resetDatabase() {
+const cleanDatabase = async () => {
   try {
-    // Подключаемся к базе данных
     await client.connect()
+    console.log('Подключение к базе данных установлено.')
 
-    // Получаем список всех таблиц в базе данных
-    const res = await client.query(`
-            SELECT table_name
-            FROM information_schema.tables
-            WHERE table_schema = 'public'
-            AND table_type = 'BASE TABLE';
-        `)
+    const cleanSQL = fs.readFileSync(cleanFilePath, 'utf-8')
+    await client.query(cleanSQL)
 
-    const tableNames = res.rows.map((row) => row.table_name)
-
-    if (tableNames.length === 0) {
-      console.log('No tables found to delete or truncate.')
-      return
-    }
-
-    // 1. Очищаем таблицы
-    for (let tableName of tableNames) {
-      console.log(`Truncating table: ${tableName}`)
-      await client.query(
-        `TRUNCATE TABLE ${tableName} RESTART IDENTITY CASCADE;`
-      )
-    }
-
-    console.log('All tables have been truncated successfully.')
-
-    // 2. Удаляем таблицы
-    for (let tableName of tableNames) {
-      console.log(`Dropping table: ${tableName}`)
-      await client.query(`DROP TABLE IF EXISTS ${tableName} CASCADE;`)
-    }
-
-    console.log('All tables have been dropped successfully.')
+    console.log('Очистка базы данных выполнена успешно.')
   } catch (err) {
-    console.error('Error resetting the database:', err)
+    console.error('Ошибка очистки базы данных:', err.message)
   } finally {
-    // Закрываем соединение с базой данных
     await client.end()
+    console.log('Подключение к базе данных закрыто.')
   }
 }
 
-resetDatabase()
+cleanDatabase()
