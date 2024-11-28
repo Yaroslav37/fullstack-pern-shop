@@ -43,7 +43,7 @@ export default function ProductDetail() {
         <img
           src={product.image_url}
           alt={product.name}
-          className="w-64 h-64 object-cover mb-4"
+          className=" object-cover mb-4"
         />
         <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
         <p className="text-lg mb-4">${product.price}</p>
