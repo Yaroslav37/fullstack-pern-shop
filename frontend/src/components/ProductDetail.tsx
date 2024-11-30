@@ -12,7 +12,7 @@ export default function ProductDetail() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/products/${id}`)
+        const response = await axios.get(`http://localhost:4000/products/${id}`)
         setProduct(response.data.product)
         setIsLoading(false)
         // eslint-disable-next-line @typescript-eslint/no-unused-vars

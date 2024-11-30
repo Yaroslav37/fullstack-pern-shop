@@ -28,21 +28,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../components/ui/dialog'
-
-interface Product {
-  id: string
-  name: string
-  game: string
-  description: string
-  price: number
-  imageUrl: string
-  stock: number
-}
-
-interface Game {
-  id: string
-  name: string
-}
+import { Product, Game } from '@/types'
 
 const Products: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([])
@@ -67,7 +53,7 @@ const Products: React.FC = () => {
     const fetchProducts = async () => {
       setIsLoading(true)
       try {
-        const response = await axios.get('http://localhost:3000/products')
+        const response = await axios.get('http://localhost:4000/products')
         const productsData = response.data.products.map((product: any) => ({
           id: product.id,
           name: product.name,
@@ -87,7 +73,7 @@ const Products: React.FC = () => {
 
     const fetchGames = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/games')
+        const response = await axios.get('http://localhost:4000/games')
         setGames(response.data.games)
       } catch (error) {
         console.error('Ошибка получения игр:', error)
@@ -114,9 +100,9 @@ const Products: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      await axios.post('http://localhost:3000/products', newProduct)
+      await axios.post('http://localhost:4000/products', newProduct)
       // Refresh products list
-      const response = await axios.get('http://localhost:3000/products')
+      const response = await axios.get('http://localhost:4000/products')
       setProducts(response.data.products)
       // Reset form
       setNewProduct({
@@ -135,7 +121,7 @@ const Products: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:3000/products/${id}`)
+      await axios.delete(`http://localhost:4000/products/${id}`)
       setProducts(products.filter((product) => product.id !== id))
     } catch (error) {
       console.error('Ошибка удаления товара:', error)

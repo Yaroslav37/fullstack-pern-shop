@@ -2,14 +2,7 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardTitle } from '@/components/ui/card'
 import { Skeleton } from './ui/skeleton'
 import { Link } from 'react-router-dom'
-
-interface Product {
-  id: string
-  name: string
-  price: string
-  description: string
-  image_url: string
-}
+import { Product } from '@/types'
 
 export default function ProductList() {
   const [products, setProducts] = useState<Product[]>([])
@@ -19,7 +12,7 @@ export default function ProductList() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/products/`)
+        const response = await fetch(`http://localhost:4000/products/`)
 
         if (!response.ok) {
           throw new Error('Failed to fetch products')
@@ -75,7 +68,7 @@ export default function ProductList() {
             <CardContent className="p-4">
               <div className="relative h-48 mb-4 overflow-hidden">
                 <img
-                  src={product.image_url}
+                  src={product.imageUrl}
                   alt={product.name}
                   className="w-full h-full object-fit"
                 />

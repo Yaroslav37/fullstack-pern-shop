@@ -26,7 +26,7 @@ const Users: React.FC = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/users')
+        const response = await axios.get('http://localhost:4000/users')
         setUsers(response.data.users)
         setIsLoading(false)
       } catch (error) {
