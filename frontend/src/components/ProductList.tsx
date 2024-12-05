@@ -19,7 +19,17 @@ export default function ProductList() {
         }
 
         const data = await response.json()
-        setProducts(data.products)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const productsData = data.products.map((product: any) => ({
+          id: product.id,
+          name: product.name,
+          game: product.game,
+          description: product.description,
+          price: parseFloat(product.price),
+          imageUrl: product.image_url,
+          stock: product.stock,
+        }))
+        setProducts(productsData)
         setIsLoading(false)
       } catch (err) {
         setError(`An error occurred while fetching products: ${err}`)
@@ -56,22 +66,39 @@ export default function ProductList() {
     return <div className="text-center">No products found</div>
   }
 
+  function isVideo(mediaUrl: string) {
+    return mediaUrl.endsWith('.webm') ? true : false
+  }
+
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 pl-32 pr-32">
       {products.map((product) => (
         <Link
           to={`/product/${product.id}`}
           key={product.id}
           state={{ product }}
         >
-          <Card>
+          <Card className="bg-[url('https://store.supercell.com/_next/static/media/brawlercard-hero-bg.99024bb5.png')]">
             <CardContent className="p-4">
-              <div className="relative h-48 mb-4 overflow-hidden">
-                <img
-                  src={product.imageUrl}
-                  alt={product.name}
-                  className="w-full h-full object-fit"
-                />
+              <div className="relative h-48 mb-4 overflow-hidden ">
+                {isVideo(product.imageUrl) ? (
+                  <video
+                    src={product.imageUrl}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full "
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  <img
+                    src={product.imageUrl}
+                    alt={product.name}
+                    className="w-full h-full object-contain"
+                  />
+                )}
               </div>
               <CardTitle className="mb-2">{product.name}</CardTitle>
               <p className="font-bold mb-4">${product.price}</p>

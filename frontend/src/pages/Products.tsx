@@ -30,12 +30,22 @@ import {
 } from '../components/ui/dialog'
 import { Product, Game } from '@/types'
 
+const tableheads = [
+  'ID',
+  'IMG',
+  'Название',
+  'Игра',
+  'Описание',
+  'Цена',
+  'Кол-во',
+  'Действия',
+]
+
 const Products: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([])
   const [games, setGames] = useState<Game[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [newProduct, setNewProduct] = useState({
     name: '',
     game_id: '',
@@ -136,6 +146,10 @@ const Products: React.FC = () => {
     return <div className="bg-red-500">{error}</div>
   }
 
+  function isVideo(mediaUrl: string) {
+    return mediaUrl.endsWith('.webm') ? true : false
+  }
+
   return (
     <div className="space-y-4">
       <h1 className="text-3xl font-bold">Управление товарами</h1>
@@ -201,14 +215,9 @@ const Products: React.FC = () => {
         <TableCaption>Список товаров</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead>ID</TableHead>
-            <TableHead>IMG</TableHead>
-            <TableHead>Название</TableHead>
-            <TableHead>Игра</TableHead>
-            <TableHead>Описание</TableHead>
-            <TableHead>Цена</TableHead>
-            <TableHead>Количество</TableHead>
-            <TableHead>Действия</TableHead>
+            {tableheads.map((tablehead) => {
+              return <TableHead className="text-center">{tablehead}</TableHead>
+            })}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -221,19 +230,38 @@ const Products: React.FC = () => {
                 <Dialog>
                   <DialogTrigger>
                     <Avatar>
-                      <AvatarImage src={product.imageUrl} />
-                      <AvatarFallback>{product.name[0]}</AvatarFallback>
+                      {isVideo(product.imageUrl) ? (
+                        <AvatarFallback>{product.name[0]}</AvatarFallback>
+                      ) : (
+                        <AvatarImage
+                          src={product.imageUrl}
+                          alt={product.name}
+                        />
+                      )}
                     </Avatar>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                       <DialogTitle>{product.name}</DialogTitle>
                       <DialogDescription>
-                        <img
-                          src={product.imageUrl}
-                          alt={product.name}
-                          className="w-full h-auto"
-                        />
+                        {isVideo(product.imageUrl) ? (
+                          <video
+                            src={product.imageUrl}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="w-full h-auto bg-transparent"
+                          >
+                            Your browser does not support the video tag.
+                          </video>
+                        ) : (
+                          <img
+                            src={product.imageUrl}
+                            alt={product.name}
+                            className="w-full h-auto object-cover"
+                          />
+                        )}
                       </DialogDescription>
                     </DialogHeader>
                   </DialogContent>
@@ -242,14 +270,14 @@ const Products: React.FC = () => {
               <TableCell>{product.name}</TableCell>
               <TableCell>{product.game}</TableCell>
               <TableCell>{product.description}</TableCell>
-              <TableCell>${product.price.toFixed(2)}</TableCell>
+              <TableCell>${product.price}</TableCell>
               <TableCell>{product.stock}</TableCell>
               <TableCell>
                 <Button
                   variant="destructive"
                   onClick={() => handleDelete(product.id)}
                 >
-                  Удалить
+                  Remove
                 </Button>
               </TableCell>
             </TableRow>

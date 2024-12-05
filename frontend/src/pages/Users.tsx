@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect } from 'react'
+import axios from 'axios'
 import {
   Table,
   TableBody,
@@ -8,8 +8,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '../components/ui/table'
-import axios from 'axios'
+} from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
+import { useToast } from '@/hooks/use-toast'
+import { Toaster } from '@/components/ui/toaster'
 
 interface User {
   id: number
@@ -22,21 +24,39 @@ const Users: React.FC = () => {
   const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { toast } = useToast()
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get('http://localhost:4000/users')
+      setUsers(response.data.users)
+      setIsLoading(false)
+    } catch (error) {
+      setError('Ошибка получения пользователей')
+      setIsLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get('http://localhost:4000/users')
-        setUsers(response.data.users)
-        setIsLoading(false)
-      } catch (error) {
-        setError('Ошибка получения пользователей')
-        setIsLoading(false)
-      }
-    }
-
     fetchUsers()
   }, [])
+
+  const handleAssignAdmin = async (userId: number) => {
+    try {
+      await axios.put(`http://localhost:4000/users/${userId}/assign-admin`)
+      toast({
+        title: 'Успешно',
+        description: 'Пользователь назначен администратором.',
+      })
+      fetchUsers() // Обновляем список пользователей
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось назначить администратора.',
+        variant: 'destructive',
+      })
+    }
+  }
 
   if (isLoading) {
     return <div>Загрузка...</div>
@@ -54,9 +74,10 @@ const Users: React.FC = () => {
         <TableHeader>
           <TableRow>
             <TableHead>ID</TableHead>
-            <TableHead>Имя</TableHead>
+            <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
-            <TableHead>Роль</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -66,10 +87,18 @@ const Users: React.FC = () => {
               <TableCell>{user.username}</TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.role}</TableCell>
+              <TableCell>
+                {user.role === 'User' && (
+                  <Button onClick={() => handleAssignAdmin(user.id)}>
+                    Make admin
+                  </Button>
+                )}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+      <Toaster />
     </div>
   )
 }

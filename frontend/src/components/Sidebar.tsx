@@ -5,11 +5,11 @@ import { ScrollArea } from './ui/scroll-area'
 import { Users, ShoppingBag, Tag, CreditCard, ShoppingCart } from 'lucide-react'
 
 const navItems = [
-  { name: 'Пользователи', href: '/admin/users', icon: Users },
-  { name: 'Товары', href: '/admin/products', icon: ShoppingBag },
-  { name: 'Промокоды', href: '/admin/promo-codes', icon: Tag },
-  { name: 'Транзакции', href: '/admin/transactions', icon: CreditCard },
-  { name: 'Покупки', href: '/admin/purchases', icon: ShoppingCart },
+  { name: 'Users', href: '/admin/users', icon: Users },
+  { name: 'Products', href: '/admin/products', icon: ShoppingBag },
+  { name: 'Promocodes', href: '/admin/promo-codes', icon: Tag },
+  { name: 'Transactions', href: '/admin/transactions', icon: CreditCard },
+  { name: 'Purchases', href: '/admin/purchases', icon: ShoppingCart },
 ]
 
 const Sidebar: React.FC = () => {
@@ -20,7 +20,7 @@ const Sidebar: React.FC = () => {
       <div className="space-y-4 py-4">
         <div className="px-3 py-2">
           <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
-            Админ панель
+            Dashboard
           </h2>
           <ScrollArea className="h-[calc(100vh-8rem)] px-1">
             <div className="space-y-1">

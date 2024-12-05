@@ -5,7 +5,7 @@ import axios from 'axios'
 import { Promocode, NewPromocode } from '../types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Checkbox } from '@/components/ui/checkbox'
+import { PromocodeCheckbox } from '@/components/ui/promocode-checkbox'
 import {
   Table,
   TableBody,
@@ -41,11 +41,19 @@ const PromocodesManager: React.FC = () => {
     code: '',
     discount: 0,
     expiration_date: '',
-    is_active: true,
+    is_active: false,
   })
   const [editingPromocode, setEditingPromocode] = useState<Promocode | null>(
     null
   )
+
+  const handleCheckboxChange = (checked: boolean) => {
+    if (editingPromocode) {
+      setEditingPromocode({ ...editingPromocode, is_active: checked })
+    } else {
+      setNewPromocode({ ...newPromocode, is_active: checked })
+    }
+  }
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] =
     useState<Promocode | null>(null)
@@ -175,27 +183,12 @@ const PromocodesManager: React.FC = () => {
                 />
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="is_active"
-                  name="is_active"
-                  checked={
+                <PromocodeCheckbox
+                  isActive={
                     editingPromocode?.is_active || newPromocode.is_active
                   }
-                  onCheckedChange={(checked) => {
-                    if (editingPromocode) {
-                      setEditingPromocode({
-                        ...editingPromocode,
-                        is_active: checked as boolean,
-                      })
-                    } else {
-                      setNewPromocode({
-                        ...newPromocode,
-                        is_active: checked as boolean,
-                      })
-                    }
-                  }}
+                  onChange={handleCheckboxChange}
                 />
-                <Label htmlFor="is_active">Is Active</Label>
               </div>
             </div>
             <DialogFooter>
