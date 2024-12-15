@@ -67,7 +67,11 @@ router.get('/games', async (req, res) => {
 // Получение всех товаров
 router.get('/products', async (req, res) => {
   try {
-    const query = 'SELECT * FROM product;'
+    const query = `
+      SELECT p.id, p.name, g.name as game, p.description, p.price, p.stock, p.image_url
+      FROM product p
+      JOIN game g ON p.game_id = g.id;
+    `
     const result = await client.query(query)
 
     res.status(200).json({ products: result.rows })
@@ -82,7 +86,12 @@ router.get('/products/:id', async (req, res) => {
   const { id } = req.params
 
   try {
-    const query = 'SELECT * FROM product WHERE id = $1;'
+    const query = `
+      SELECT p.id, p.name, g.name as game, p.description, p.price, p.stock, p.image_url
+      FROM product p
+      JOIN game g ON p.game_id = g.id
+      WHERE p.id = $1;
+    `
     const result = await client.query(query, [id])
 
     if (result.rowCount === 0) {

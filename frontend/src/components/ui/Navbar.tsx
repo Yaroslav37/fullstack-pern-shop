@@ -1,6 +1,4 @@
-'use client'
-
-import { Link } from 'react-router'
+import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 
 export default function Navbar() {
@@ -13,7 +11,7 @@ export default function Navbar() {
             to="/"
             className="flex items-center gap-2 text-xl font-semibold text-black"
           >
-            <img src="./web.svg" className="h-8"></img>
+            <img src="/web.svg" alt="PayChara Logo" className="h-8" />
             PayChara
           </Link>
 
@@ -38,14 +36,6 @@ export default function Navbar() {
               Reviews
             </Link>
           </nav>
-
-          {/* Auth Button */}
-          <Button
-            variant="outline"
-            className="bg-white/50 hover:bg-white/60 transition-colors border-gray-200"
-          >
-            Login
-          </Button>
         </div>
       </div>
     </header>

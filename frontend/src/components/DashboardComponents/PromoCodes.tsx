@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { Promocode, NewPromocode } from '../types'
+import { Promocode, NewPromocode } from '../../types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { PromocodeCheckbox } from '@/components/ui/promocode-checkbox'

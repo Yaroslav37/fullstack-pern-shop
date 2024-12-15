@@ -1,6 +1,6 @@
 import React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 
 const Dashboard: React.FC = () => {
   return (

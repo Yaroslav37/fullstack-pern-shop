@@ -41,7 +41,7 @@ export default function ProductDetail() {
     <div className="container mx-auto p-4">
       <div className="flex flex-col items-center">
         <img
-          src={product.image_url}
+          src={product.imageUrl}
           alt={product.name}
           className=" object-cover mb-4"
         />

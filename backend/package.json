@@ -5,7 +5,7 @@
   "scripts": {
     "migrate": "node src/db/runMigrations.js",
     "seed": "node src/db/runSeeds.js",
-    "reset": "node src/db/esetDatabase.js",
+    "reset": "node src/db/resetDatabase.js",
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"

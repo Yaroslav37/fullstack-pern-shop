@@ -11,6 +11,7 @@ CREATE TABLE "user" (
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     role_id INT REFERENCES role(id),
+    balance DECIMAL(10, 2) DEFAULT 0.00, -- Добавлен столбец balance
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -64,7 +65,7 @@ CREATE TABLE "order" (
 -- Создание таблицы транзакций
 CREATE TABLE transaction (
     id SERIAL PRIMARY KEY,
-    order_id INT REFERENCES "order"(id) ON DELETE CASCADE,
+    user_id INT REFERENCES "user"(id) ON DELETE CASCADE, -- Изменено на user_id
     amount DECIMAL(10, 2) NOT NULL,
     payment_method VARCHAR(50),
     status VARCHAR(20) CHECK (status IN ('Pending', 'Completed', 'Failed')),
@@ -93,3 +94,4 @@ CREATE TABLE log (
 CREATE INDEX idx_user_email ON "user"(email);
 CREATE INDEX idx_cart_user_id ON cart(user_id);
 CREATE INDEX idx_order_user_id ON "order"(user_id);
+CREATE INDEX idx_transaction_user_id ON transaction(user_id); -- Добавлен индекс для user_id в таблице transaction

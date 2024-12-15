@@ -8,18 +8,18 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '../components/ui/table'
-import { Label } from '../components/ui/label'
-import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar'
-import { Button } from '../components/ui/button'
-import { Input } from '../components/ui/input'
+} from '../ui/table'
+import { Label } from '../ui/label'
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../components/ui/select'
+} from '../ui/select'
 import {
   Dialog,
   DialogContent,
@@ -27,7 +27,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '../components/ui/dialog'
+} from '../ui/dialog'
 import { Product, Game } from '@/types'
 
 const tableheads = [
