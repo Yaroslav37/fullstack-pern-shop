@@ -12,22 +12,29 @@ import Transactions from './components/DashboardComponents/Transactions.tsx'
 import Users from './components/DashboardComponents/Users.tsx'
 import LoginPage from './components/AuthComponents/LoginPage.tsx'
 import RegisterPage from './components/AuthComponents/RegisterPage.tsx'
+import { UserProvider } from './contexts/AuthContext.tsx'
+import TopUpBalancePage from './components/ReplenishPage.tsx'
+import Cart from './pages/Cart.tsx'
 
 createRoot(document.getElementById('root')!).render(
-  <BrowserRouter>
-    <Routes>
-      <Route path="/" element={<App />} />
-      <Route path="product/:id" element={<ProductDetail />} />
-      <Route path="auth/login" element={<LoginPage />} />
-      <Route path="auth/register" element={<RegisterPage />} />
-      <Route path="admin" element={<Layout />}>
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="products" element={<Products />} />
-        <Route path="promo-codes" element={<PromocodesManager />} />
-        <Route path="transactions" element={<Transactions />} />
-        <Route path="users" element={<Users />} />
-        <Route path="purchases" element={<Purchases />} />
-      </Route>
-    </Routes>
-  </BrowserRouter>
+  <UserProvider>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<App />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/top-up-balance" element={<TopUpBalancePage />} />
+        <Route path="product/:id" element={<ProductDetail />} />
+        <Route path="auth/login" element={<LoginPage />} />
+        <Route path="auth/register" element={<RegisterPage />} />
+        <Route path="admin" element={<Layout />}>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="products" element={<Products />} />
+          <Route path="promo-codes" element={<PromocodesManager />} />
+          <Route path="transactions" element={<Transactions />} />
+          <Route path="users" element={<Users />} />
+          <Route path="purchases" element={<Purchases />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  </UserProvider>
 )

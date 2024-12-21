@@ -20,9 +20,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Link, useNavigate } from 'react-router-dom'
-import axios from 'axios'
-import { AuthResponse } from './types/auth'
+import { Link } from 'react-router-dom'
+import { useUser } from '../../contexts/AuthContext'
+import { useNavigate } from 'react-router-dom'
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -33,6 +33,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
   const navigate = useNavigate()
+  const { setUser } = useUser()
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -45,25 +46,34 @@ export default function LoginPage() {
   async function onSubmit(values: z.infer<typeof loginSchema>) {
     setIsLoading(true)
     try {
-      const response = await axios.post(
-        'http://localhost:4000/auth/login',
-        values,
-        {
-          headers: { 'Content-Type': 'application/json' },
-        }
-      )
-
-      const data: AuthResponse = response.data
-      toast({
-        title: 'Login Successful',
-        description: data.message,
+      const response = await fetch('http://localhost:4000/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
       })
 
-      // Store the token and redirect the user
-      localStorage.setItem('token', data.token || '')
-      navigate('/')
+      const data = await response.json()
+
+      if (response.ok) {
+        toast({
+          title: 'Login Successful',
+          description: data.message,
+        })
+
+        // Store the token and user data
+        localStorage.setItem('token', data.token || '')
+        setUser(data.user)
+        navigate('/')
+      } else {
+        throw new Error(data.error || 'Login failed')
+      }
     } catch (error) {
-      // ... (error handling remains the same)
+      toast({
+        title: 'Login Failed',
+        description:
+          error instanceof Error ? error.message : 'An error occurred',
+        variant: 'destructive',
+      })
     } finally {
       setIsLoading(false)
     }

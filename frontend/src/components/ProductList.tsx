@@ -3,11 +3,14 @@ import { Card, CardContent, CardTitle } from '@/components/ui/card'
 import { Skeleton } from './ui/skeleton'
 import { Link } from 'react-router-dom'
 import { Product } from '@/types'
+import { Button } from '@/components/ui/button'
+import { useUser } from '@/contexts/AuthContext'
 
 export default function ProductList() {
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { user } = useUser()
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -19,7 +22,6 @@ export default function ProductList() {
         }
 
         const data = await response.json()
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const productsData = data.products.map((product: any) => ({
           id: product.id,
           name: product.name,
@@ -39,6 +41,33 @@ export default function ProductList() {
 
     fetchProducts()
   }, [])
+
+  const addToCart = async (productId: string) => {
+    if (!user) {
+      // Redirect to login or show a message
+      return
+    }
+
+    try {
+      const response = await fetch('http://localhost:4000/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({ product_id: productId, quantity: 1 }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to add item to cart')
+      }
+
+      // Show a success message or update UI
+    } catch (err) {
+      console.error('Error adding item to cart:', err)
+      // Show an error message
+    }
+  }
 
   console.log(JSON.stringify(products))
 
@@ -73,13 +102,12 @@ export default function ProductList() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 pl-32 pr-32">
       {products.map((product) => (
-        <Link
-          to={`/product/${product.id}`}
+        <Card
           key={product.id}
-          state={{ product }}
+          className="bg-[url('https://store.supercell.com/_next/static/media/brawlercard-hero-bg.99024bb5.png')]"
         >
-          <Card className="bg-[url('https://store.supercell.com/_next/static/media/brawlercard-hero-bg.99024bb5.png')]">
-            <CardContent className="p-4">
+          <CardContent className="p-4">
+            <Link to={`/product/${product.id}`} state={{ product }}>
               <div className="relative h-48 mb-4 overflow-hidden ">
                 {isVideo(product.imageUrl) ? (
                   <video
@@ -102,9 +130,10 @@ export default function ProductList() {
               </div>
               <CardTitle className="mb-2">{product.name}</CardTitle>
               <p className="font-bold mb-4">${product.price}</p>
-            </CardContent>
-          </Card>
-        </Link>
+            </Link>
+            <Button onClick={() => addToCart(product.id)}>Add to Cart</Button>
+          </CardContent>
+        </Card>
       ))}
     </div>
   )

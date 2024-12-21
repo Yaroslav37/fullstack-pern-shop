@@ -1,11 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+/* 
 @font-face {
   font-family: Supercell;
   src: url('./supercell-magic-webfont.ttf');
-}
+} */
 :root {
   font-family: Supercell, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

@@ -36,6 +36,11 @@ router.put('/:id/assign-admin', async (req, res) => {
   }
 })
 
+/**
+ * @route GET /users/balance
+ * @desc Получение баланса пользователя
+ * @access Private
+ */
 router.get('/balance', authenticateToken, async (req, res) => {
   const userId = req.user.id
 
@@ -52,6 +57,42 @@ router.get('/balance', authenticateToken, async (req, res) => {
     res.status(200).json({ balance })
   } catch (error) {
     console.error('Ошибка получения баланса:', error.message)
+    res.status(500).json({ error: 'Ошибка сервера.' })
+  }
+})
+
+/**
+ * @route PUT /users/balance
+ * @desc Пополнение баланса пользователя
+ * @access Private
+ */
+router.put('/balance', authenticateToken, async (req, res) => {
+  const userId = req.user.id
+  const { amount } = req.body
+
+  if (!amount || amount <= 0) {
+    return res.status(400).json({ error: 'Некорректная сумма пополнения.' })
+  }
+
+  try {
+    const query = `
+      UPDATE "user"
+      SET balance = balance + $1
+      WHERE id = $2
+      RETURNING balance;
+    `
+    const values = [amount, userId]
+    const result = await client.query(query, values)
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Пользователь не найден.' })
+    }
+
+    const balance = result.rows[0].balance
+
+    res.status(200).json({ message: 'Баланс пополнен.', balance })
+  } catch (error) {
+    console.error('Ошибка пополнения баланса:', error.message)
     res.status(500).json({ error: 'Ошибка сервера.' })
   }
 })

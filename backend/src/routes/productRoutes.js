@@ -1,5 +1,6 @@
 const express = require('express')
 const client = require('../db/dbClient')
+const authenticateToken = require('../middleware/authMiddleware')
 
 const router = express.Router()
 
@@ -139,6 +140,130 @@ router.delete('/products/:id', async (req, res) => {
     res.status(200).json({ message: 'Товар удален.', product: result.rows[0] })
   } catch (error) {
     console.error('Ошибка удаления товара:', error.message)
+    res.status(500).json({ error: 'Ошибка сервера.' })
+  }
+})
+
+// Добавление товара в корзину
+router.post('/cart', authenticateToken, async (req, res) => {
+  const userId = req.user.id
+  const { product_id, quantity } = req.body
+
+  if (!product_id || !quantity || quantity <= 0) {
+    return res.status(400).json({ error: 'Некорректные данные.' })
+  }
+
+  try {
+    // Проверка наличия корзины у пользователя
+    let query = 'SELECT id FROM cart WHERE user_id = $1'
+    let result = await client.query(query, [userId])
+
+    let cartId
+    if (result.rows.length === 0) {
+      // Создание новой корзины
+      query = 'INSERT INTO cart (user_id) VALUES ($1) RETURNING id'
+      result = await client.query(query, [userId])
+      cartId = result.rows[0].id
+    } else {
+      cartId = result.rows[0].id
+    }
+
+    // Проверка наличия товара в корзине
+    query =
+      'SELECT id, quantity FROM cart_product WHERE cart_id = $1 AND product_id = $2'
+    result = await client.query(query, [cartId, product_id])
+
+    if (result.rows.length === 0) {
+      // Добавление нового товара в корзину
+      query = `
+        INSERT INTO cart_product (cart_id, product_id, quantity)
+        VALUES ($1, $2, $3)
+        RETURNING *;
+      `
+      const values = [cartId, product_id, quantity]
+      result = await client.query(query, values)
+    } else {
+      // Обновление количества товара в корзине
+      query = `
+        UPDATE cart_product
+        SET quantity = $1
+        WHERE cart_id = $2 AND product_id = $3
+        RETURNING *;
+      `
+      const values = [quantity, cartId, product_id]
+      result = await client.query(query, values)
+    }
+
+    res.status(200).json({
+      message: 'Товар добавлен в корзину.',
+      cartProduct: result.rows[0],
+    })
+  } catch (error) {
+    console.error('Ошибка добавления товара в корзину:', error.message)
+    res.status(500).json({ error: 'Ошибка сервера.' })
+  }
+})
+
+// Получение товаров из корзины
+router.get('/cart', authenticateToken, async (req, res) => {
+  const userId = req.user.id
+
+  try {
+    const query = `
+      SELECT p.id, p.name, p.description, p.price, p.image_url, cp.quantity
+      FROM cart_product cp
+      JOIN product p ON cp.product_id = p.id
+      JOIN cart c ON cp.cart_id = c.id
+      WHERE c.user_id = $1;
+    `
+    const result = await client.query(query, [userId])
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Корзина пуста.' })
+    }
+
+    res.status(200).json({ cartProducts: result.rows })
+  } catch (error) {
+    console.error('Ошибка получения товаров из корзины:', error.message)
+    res.status(500).json({ error: 'Ошибка сервера.' })
+  }
+})
+
+// Удаление товара из корзины
+router.delete('/cart', authenticateToken, async (req, res) => {
+  const userId = req.user.id
+  const { product_id } = req.body
+
+  if (!product_id) {
+    return res.status(400).json({ error: 'Некорректные данные.' })
+  }
+
+  try {
+    // Проверка наличия корзины у пользователя
+    let query = 'SELECT id FROM cart WHERE user_id = $1'
+    let result = await client.query(query, [userId])
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Корзина не найдена.' })
+    }
+
+    const cartId = result.rows[0].id
+
+    // Удаление товара из корзины
+    query =
+      'DELETE FROM cart_product WHERE cart_id = $1 AND product_id = $2 RETURNING *'
+    result = await client.query(query, [cartId, product_id])
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Товар не найден в корзине.' })
+    }
+
+    res.status(200).json({
+      message: 'Товар удален из корзины.',
+      cartProduct: result.rows[0],
+    })
+  } catch (error) {
+    console.error('Ошибка удаления товара из корзины:', error.message)
     res.status(500).json({ error: 'Ошибка сервера.' })
   }
 })
