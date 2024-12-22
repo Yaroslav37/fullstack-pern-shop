@@ -22,13 +22,17 @@ import {
 } from '@/components/ui/card'
 import { useUser } from '@/contexts/AuthContext'
 import Navbar from './ui/Navbar'
+import { Separator } from '@/components/ui/separator'
+import { Toaster } from './ui/toaster'
 
 const topUpSchema = z.object({
   amount: z.number().positive('Amount must be positive'),
+  promocode: z.string().optional(),
 })
 
 export default function TopUpBalancePage() {
   const [isLoading, setIsLoading] = useState(false)
+  const [isApplyingPromocode, setIsApplyingPromocode] = useState(false)
   const { toast } = useToast()
   const { user, updateBalance } = useUser()
 
@@ -36,6 +40,7 @@ export default function TopUpBalancePage() {
     resolver: zodResolver(topUpSchema),
     defaultValues: {
       amount: 0,
+      promocode: '',
     },
   })
 
@@ -59,6 +64,7 @@ export default function TopUpBalancePage() {
           description: data.message,
         })
         updateBalance(data.balance)
+        form.reset()
       } else {
         throw new Error(data.error || 'Failed to update balance')
       }
@@ -71,6 +77,48 @@ export default function TopUpBalancePage() {
       })
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const applyPromocode = async () => {
+    const promocode = form.getValues('promocode')
+    if (!promocode) return
+
+    setIsApplyingPromocode(true)
+    try {
+      const response = await fetch(
+        'http://localhost:4000/users/apply-promocode',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: JSON.stringify({ code: promocode }),
+        }
+      )
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast({
+          title: 'Success',
+          description: data.message,
+        })
+        form.setValue('promocode', '')
+        updateBalance(data.balance)
+      } else {
+        throw new Error(data.error || 'Failed to apply promocode')
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description:
+          error instanceof Error ? error.message : 'Failed to apply promocode',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsApplyingPromocode(false)
     }
   }
 
@@ -91,7 +139,7 @@ export default function TopUpBalancePage() {
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
+                className="space-y-6"
               >
                 <FormField
                   control={form.control}
@@ -116,10 +164,39 @@ export default function TopUpBalancePage() {
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? 'Processing...' : 'Top Up'}
                 </Button>
+
+                <Separator className="my-4" />
+
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="promocode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Promocode</FormLabel>
+                        <div className="flex gap-2">
+                          <FormControl>
+                            <Input placeholder="Enter promocode" {...field} />
+                          </FormControl>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={applyPromocode}
+                            disabled={isApplyingPromocode || !field.value}
+                          >
+                            {isApplyingPromocode ? 'Applying...' : 'Apply'}
+                          </Button>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </form>
             </Form>
           </CardContent>
         </Card>
+        <Toaster />
       </div>
     </main>
   )

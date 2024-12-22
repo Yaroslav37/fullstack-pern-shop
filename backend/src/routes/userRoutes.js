@@ -97,4 +97,100 @@ router.put('/balance', authenticateToken, async (req, res) => {
   }
 })
 
+/**
+ * @route GET /users/:id/logs
+ * @desc Получение логов пользователя по ID
+ * @access Private
+ */
+router.get('/:id/logs', authenticateToken, async (req, res) => {
+  const { id } = req.params
+
+  try {
+    const query = `
+      SELECT action, details, timestamp
+      FROM log
+      WHERE user_id = $1
+      ORDER BY timestamp DESC;
+    `
+    const values = [id]
+    const result = await client.query(query, values)
+
+    if (result.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ error: 'Логи не найдены для данного пользователя.' })
+    }
+
+    const logs = result.rows
+      .map((row) => {
+        let details = JSON.parse(row.details)
+        let formattedDetails = ''
+
+        switch (details.action) {
+          case 'balance_update':
+            formattedDetails = `Списано ${
+              details.old_balance - details.new_balance
+            } дата и время: ${row.timestamp}`
+            break
+          case 'cart_product_insert':
+            formattedDetails = `Добавлен товар в корзину: ${details.product_name}, количество: ${details.quantity}, дата и время: ${row.timestamp}`
+            break
+          case 'cart_product_update':
+            formattedDetails = `Обновлен товар в корзине: ${details.product_name}, количество: ${details.quantity}, дата и время: ${row.timestamp}`
+            break
+          case 'cart_product_delete':
+            formattedDetails = `Удален товар из корзины: ${details.product_name}, дата и время: ${row.timestamp}`
+            break
+          case 'order_insert':
+            formattedDetails = `Создан заказ: ${details.order_id}, сумма: ${details.total_amount}, статус: ${details.status}, дата и время: ${row.timestamp}`
+            break
+          default:
+            formattedDetails = `Действие: ${details.action}, дата и время: ${row.timestamp}`
+        }
+
+        return formattedDetails
+      })
+      .join('\n')
+
+    res.status(200).send(logs)
+  } catch (error) {
+    console.error('Ошибка получения логов:', error.message)
+    res.status(500).json({ error: 'Ошибка сервера.' })
+  }
+})
+
+/**
+ * @route POST /users/apply-promocode
+ * @desc Применение промокода
+ * @access Private
+ */
+router.post('/apply-promocode', authenticateToken, async (req, res) => {
+  const userId = req.user.id
+  const { code } = req.body
+
+  if (!code) {
+    return res.status(400).json({ error: 'Промокод не указан.' })
+  }
+
+  try {
+    const query = `
+      SELECT apply_promocode($1, $2) AS result;
+    `
+    const values = [userId, code]
+    const result = await client.query(query, values)
+
+    if (
+      result.rows[0].result.includes('недействителен') ||
+      result.rows[0].result.includes('уже активировали')
+    ) {
+      return res.status(400).json({ error: result.rows[0].result })
+    }
+
+    res.status(200).json({ message: result.rows[0].result })
+  } catch (error) {
+    console.error('Ошибка применения промокода:', error.message)
+    res.status(500).json({ error: 'Ошибка сервера.' })
+  }
+})
+
 module.exports = router

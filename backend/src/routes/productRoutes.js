@@ -154,6 +154,8 @@ router.post('/cart', authenticateToken, async (req, res) => {
   }
 
   try {
+    console.log(product_id)
+    console.log(userId)
     // Проверка наличия корзины у пользователя
     let query = 'SELECT id FROM cart WHERE user_id = $1'
     let result = await client.query(query, [userId])
@@ -264,6 +266,107 @@ router.delete('/cart', authenticateToken, async (req, res) => {
     })
   } catch (error) {
     console.error('Ошибка удаления товара из корзины:', error.message)
+    res.status(500).json({ error: 'Ошибка сервера.' })
+  }
+})
+
+// Покупка всех товаров из корзины
+router.post('/cart/checkout', authenticateToken, async (req, res) => {
+  const userId = req.user.id
+
+  try {
+    // Получение товаров из корзины
+    const query = `
+      SELECT p.id, p.price, cp.quantity
+      FROM cart_product cp
+      JOIN product p ON cp.product_id = p.id
+      JOIN cart c ON cp.cart_id = c.id
+      WHERE c.user_id = $1;
+    `
+    const result = await client.query(query, [userId])
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Корзина пуста.' })
+    }
+
+    const cartProducts = result.rows
+
+    // Подсчет общей стоимости товаров в корзине
+    const totalPrice = cartProducts.reduce((total, product) => {
+      return total + product.price * product.quantity
+    }, 0)
+
+    // Проверка баланса пользователя
+    const balanceQuery = 'SELECT balance FROM "user" WHERE id = $1'
+    const balanceResult = await client.query(balanceQuery, [userId])
+    const userBalance = balanceResult.rows[0].balance
+
+    if (userBalance < totalPrice) {
+      return res.status(400).json({ error: 'Недостаточно средств на балансе.' })
+    }
+
+    // Обновление баланса пользователя
+    const updateBalanceQuery = `
+      UPDATE "user"
+      SET balance = balance - $1
+      WHERE id = $2
+      RETURNING balance;
+    `
+    const updateBalanceResult = await client.query(updateBalanceQuery, [
+      totalPrice,
+      userId,
+    ])
+
+    // Создание заказа
+    const createOrderQuery = `
+      INSERT INTO "order" (user_id, total_price, status)
+      VALUES ($1, $2, 'Completed')
+      RETURNING *;
+    `
+    const createOrderResult = await client.query(createOrderQuery, [
+      userId,
+      totalPrice,
+    ])
+    const order = createOrderResult.rows[0]
+
+    // Очистка корзины
+    const clearCartQuery = `
+      DELETE FROM cart_product
+      WHERE cart_id = (SELECT id FROM cart WHERE user_id = $1);
+    `
+    await client.query(clearCartQuery, [userId])
+
+    res.status(200).json({
+      message: 'Покупка успешно завершена.',
+      order,
+      balance: updateBalanceResult.rows[0].balance,
+    })
+  } catch (error) {
+    console.error('Ошибка покупки товаров из корзины:', error.message)
+    res.status(500).json({ error: 'Ошибка сервера.' })
+  }
+})
+
+// Получение истории покупок
+router.get('/orders', authenticateToken, async (req, res) => {
+  const userId = req.user.id
+
+  try {
+    const query = `
+      SELECT o.id, o.total_price, o.status, o.created_at
+      FROM "order" o
+      WHERE o.user_id = $1
+      ORDER BY o.created_at DESC;
+    `
+    const result = await client.query(query, [userId])
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'История покупок пуста.' })
+    }
+
+    res.status(200).json({ orders: result.rows })
+  } catch (error) {
+    console.error('Ошибка получения истории покупок:', error.message)
     res.status(500).json({ error: 'Ошибка сервера.' })
   }
 })

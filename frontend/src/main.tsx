@@ -15,18 +15,44 @@ import RegisterPage from './components/AuthComponents/RegisterPage.tsx'
 import { UserProvider } from './contexts/AuthContext.tsx'
 import TopUpBalancePage from './components/ReplenishPage.tsx'
 import Cart from './pages/Cart.tsx'
+import ProtectedRoute from './components/ProtectedRoutes.tsx'
+import UserLogs from './pages/UserLogs.tsx'
+import Reviews from './pages/Reviews.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <UserProvider>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/top-up-balance" element={<TopUpBalancePage />} />
-        <Route path="product/:id" element={<ProductDetail />} />
+        <Route path="/reviews" element={<Reviews />} />
+        <Route path="/logs" element={<UserLogs />} />
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute>
+              <Cart />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/top-up-balance"
+          element={
+            <ProtectedRoute>
+              <TopUpBalancePage />
+            </ProtectedRoute>
+          }
+        />
+        {/* <Route path="product/:id" element={<ProductDetail />} /> */}
         <Route path="auth/login" element={<LoginPage />} />
         <Route path="auth/register" element={<RegisterPage />} />
-        <Route path="admin" element={<Layout />}>
+        <Route
+          path="admin"
+          element={
+            <ProtectedRoute adminOnly>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="products" element={<Products />} />
           <Route path="promo-codes" element={<PromocodesManager />} />

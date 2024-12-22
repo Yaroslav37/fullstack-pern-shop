@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { Card, CardContent, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useUser } from '@/contexts/AuthContext'
+import Navbar from '@/components/ui/Navbar'
+import { toast } from '@/hooks/use-toast'
+import { Toaster } from '@/components/ui/toaster'
 
 interface CartItem {
   id: number
@@ -15,7 +18,7 @@ export default function Cart() {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { user } = useUser()
+  const { user, updateBalance } = useUser()
 
   useEffect(() => {
     const fetchCartItems = async () => {
@@ -55,9 +58,6 @@ export default function Cart() {
         body: JSON.stringify({
           product_id: productId,
           quantity: newQuantity,
-          // quantity:
-          //   newQuantity -
-          //   (cartItems.find((item) => item.id === productId)?.quantity || 0),
         }),
       })
 
@@ -93,23 +93,58 @@ export default function Cart() {
       setCartItems((prevItems) =>
         prevItems.filter((item) => item.id !== productId)
       )
-      console.log(cartItems)
     } catch (err) {
       setError(`An error occurred while removing the item from cart: ${err}`)
     }
   }
 
+  const checkout = async () => {
+    try {
+      const response = await fetch('http://localhost:4000/cart/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to checkout')
+      }
+
+      const data = await response.json()
+      updateBalance(data.balance)
+      setCartItems([])
+      toast({
+        title: 'Checkout Successful',
+        description: 'Your order has been placed successfully.',
+      })
+    } catch (err) {
+      toast({
+        title: 'Checkout Failed',
+        description:
+          err instanceof Error ? err.message : 'An unknown error occurred',
+        variant: 'destructive',
+      })
+    }
+  }
+
   if (isLoading) return <div>Loading...</div>
-  if (error) return <div>{error}</div>
-  console.log(cartItems)
-  if (cartItems.length === 0) return <div>Your cart is empty</div>
+  if (cartItems.length === 0 || error) return <div>Your cart is empty</div>
 
   function isVideo(mediaUrl: string) {
     return mediaUrl.endsWith('.webm') ? true : false
   }
 
+  const totalPrice = cartItems.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  )
+
   return (
     <div className="container mx-auto p-4">
+      <Navbar />
       <h1 className="text-2xl font-bold mb-4">Your Cart</h1>
       {cartItems.map((item) => (
         <Card key={item.id} className="mb-4">
@@ -162,11 +197,21 @@ export default function Cart() {
         </Card>
       ))}
       <div className="text-xl font-bold mt-4">
-        Total: $
-        {cartItems
-          .reduce((total, item) => total + item.price * item.quantity, 0)
-          .toFixed(2)}
+        Total: ${totalPrice.toFixed(2)}
       </div>
+      <Button
+        onClick={checkout}
+        className="mt-4"
+        disabled={totalPrice > (user?.balance || 0)}
+      >
+        Checkout
+      </Button>
+      {totalPrice > (user?.balance || 0) && (
+        <p className="text-red-500 mt-2">
+          Insufficient balance. Please top up your account.
+        </p>
+      )}
+      <Toaster />
     </div>
   )
 }

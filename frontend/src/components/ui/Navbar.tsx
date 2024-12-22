@@ -72,9 +72,6 @@ export default function Navbar() {
                     Login
                   </Button>
                 </Link>
-                <Link to="/auth/register">
-                  <Button size="sm">Register</Button>
-                </Link>
               </>
             )}
           </div>

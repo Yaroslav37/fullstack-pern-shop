@@ -107,30 +107,28 @@ export default function ProductList() {
           className="bg-[url('https://store.supercell.com/_next/static/media/brawlercard-hero-bg.99024bb5.png')]"
         >
           <CardContent className="p-4">
-            <Link to={`/product/${product.id}`} state={{ product }}>
-              <div className="relative h-48 mb-4 overflow-hidden ">
-                {isVideo(product.imageUrl) ? (
-                  <video
-                    src={product.imageUrl}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-full "
-                  >
-                    Your browser does not support the video tag.
-                  </video>
-                ) : (
-                  <img
-                    src={product.imageUrl}
-                    alt={product.name}
-                    className="w-full h-full object-contain"
-                  />
-                )}
-              </div>
-              <CardTitle className="mb-2">{product.name}</CardTitle>
-              <p className="font-bold mb-4">${product.price}</p>
-            </Link>
+            <div className="relative h-48 mb-4 overflow-hidden ">
+              {isVideo(product.imageUrl) ? (
+                <video
+                  src={product.imageUrl}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full "
+                >
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                <img
+                  src={product.imageUrl}
+                  alt={product.name}
+                  className="w-full h-full object-contain"
+                />
+              )}
+            </div>
+            <CardTitle className="mb-2">{product.name}</CardTitle>
+            <p className="font-bold mb-4">${product.price}</p>
             <Button onClick={() => addToCart(product.id)}>Add to Cart</Button>
           </CardContent>
         </Card>

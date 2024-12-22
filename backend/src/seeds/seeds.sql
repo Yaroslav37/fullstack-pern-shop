@@ -1,4 +1,4 @@
-TRUNCATE TABLE log, product, promocode, game, "user", role RESTART IDENTITY CASCADE;
+TRUNCATE TABLE log, product, promocode, game, "user", role, review, transaction, promocode_activation RESTART IDENTITY CASCADE;
 
 -- Вставка данных в таблицу ролей
 INSERT INTO role (name)
@@ -10,8 +10,8 @@ ON CONFLICT DO NOTHING;
 -- Вставка данных в таблицу пользователей
 INSERT INTO "user" (username, email, password_hash, role_id, balance)
 VALUES
-    ('admin', 'admin@example.com', '$2b$10$eBsEjO6bZKjW1dBsh0uLbeSkI0pOQaDO1SEyIo6cqlu5z5Jj.sZ1y', 1, 1000.00), -- Пароль: "adminpassword"
-    ('user1', 'user1@example.com', '$2b$10$ptQzSNF.oD.titMOpfrpUuF8Bd35dyAfQsAZZSSvd20/MJZ1ByWti', 2, 500.00) -- Пароль: "userpassword"
+    ('admin', 'admin@bsuir.by', '$2b$10$Kklr6KTYM03j6DOvBx5FHOQTPoGZ7Wzn7uLv3Als.tOo7HRv7oa1.', 1, 1000.00), -- Пароль "adminpassword"
+    ('user', 'user@bsuir.by', '$2b$10$Kklr6KTYM03j6DOvBx5FHOQTPoGZ7Wzn7uLv3Als.tOo7HRv7oa1.', 2, 500.00) -- Пароль: "userpassword"
 ON CONFLICT DO NOTHING;
 
 -- Вставка данных в таблицу игр
@@ -31,10 +31,10 @@ VALUES
 ON CONFLICT DO NOTHING;
 
 -- Вставка данных в таблицу промокодов
-INSERT INTO promocode (code, discount, expiration_date, is_active)
+INSERT INTO promocode (code, amount, expiration_date, activation_limit)
 VALUES
-    ('PROMO10', 10.00, '2024-12-31', TRUE),
-    ('PROMO20', 20.00, '2024-12-31', TRUE)
+    ('PROMO10', 10.00, '2024-12-31', 1),
+    ('PROMO20', 20.00, '2024-12-31', 10)
 ON CONFLICT DO NOTHING;
 
 -- Вставка тестовых данных в таблицу логов
@@ -42,4 +42,18 @@ INSERT INTO log (user_id, action, details)
 VALUES
     (1, 'Created', '{"table": "product", "details": "Added Product One"}'),
     (2, 'Updated', '{"table": "cart", "details": "Added Product Two to Cart"}')
+ON CONFLICT DO NOTHING;
+
+-- Вставка тестовых данных в таблицу транзакций
+INSERT INTO transaction (user_id, amount, type)
+VALUES
+    (1, 100.00, 'replenishment'),
+    (2, 50.00, 'withdrawal')
+ON CONFLICT DO NOTHING;
+
+-- Вставка тестовых данных в таблицу отзывов
+INSERT INTO review (user_id, rating, comment)
+VALUES
+    (2, 5, 'Отличный магазин!'),
+    (2, 4, 'Хороший магазин, но есть недостатки.')
 ON CONFLICT DO NOTHING;

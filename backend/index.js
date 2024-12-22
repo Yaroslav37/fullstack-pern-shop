@@ -5,6 +5,7 @@ const authRoutes = require('./src/routes/authRoutes')
 const productRoutes = require('./src/routes/productRoutes')
 const promocodeRoutes = require('./src/routes/promocodeRoutes')
 const userRoutes = require('./src/routes/userRoutes')
+const reviewsRoutes = require('./src/routes/reviewsRoutes')
 const cors = require('cors')
 
 const app = express()
@@ -17,6 +18,7 @@ app.use('/auth', authRoutes)
 app.use('/', productRoutes)
 app.use('/', promocodeRoutes)
 app.use('/users', userRoutes)
+app.use('/reviews', reviewsRoutes)
 ;(async () => {
   try {
     await client.connect()
