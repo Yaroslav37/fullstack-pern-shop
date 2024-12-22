@@ -152,7 +152,7 @@ const Products: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-3xl font-bold">Управление товарами</h1>
+      <h1 className="text-3xl font-bold">Product managment</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input

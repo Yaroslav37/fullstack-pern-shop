@@ -9,17 +9,8 @@ export default function GameCategories() {
       genre: 'Action',
       image: 'https://supercell.com/_next/static/media/nita.09048305.webp',
       backgroundColor: 'bg-red-600',
-      to: '#brawl-stars',
+      to: '/category/brawl-stars',
     },
-    // {
-    //   id: 2,
-    //   title: 'Clash Royale',
-    //   publisher: 'Supercell',
-    //   genre: 'Strategy',
-    //   image: 'https://supercell.com/_next/static/media/miniPekka.9579463d.webp',
-    //   backgroundColor: 'bg-zinc-900',
-    //   to: '#clash-royale',
-    // },
     {
       id: 2,
       title: 'Clash Royale',
@@ -28,7 +19,7 @@ export default function GameCategories() {
       image:
         'https://creators.supercell.com/img/character-goblin.a6847d8a.avif',
       backgroundColor: 'bg-green-500',
-      to: '#clash-royale',
+      to: '/category/clash-royale',
     },
     {
       id: 3,
@@ -38,12 +29,12 @@ export default function GameCategories() {
       image:
         'https://supercell.com/_next/static/media/princess_red_bow.6ce1177d.webp',
       backgroundColor: 'bg-blue-500',
-      to: '#clash-of-clans',
+      to: '/category/clash-of-clans',
     },
   ]
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16 p-32 bg-">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16 px-32 py-8 bg-">
       {games.map((game) => (
         <Link
           key={game.id}

@@ -20,7 +20,10 @@ const UserContext = createContext<UserContextType | undefined>(undefined)
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<User | null>(() => {
+    const storedUser = localStorage.getItem('user')
+    return storedUser ? JSON.parse(storedUser) : null
+  })
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -39,6 +42,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       if (response.ok) {
         const data = await response.json()
         setUser(data.user)
+        localStorage.setItem('user', JSON.stringify(data.user))
       } else {
         console.error('Failed to fetch user data')
         logout()
@@ -52,12 +56,15 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   const logout = () => {
     setUser(null)
     localStorage.removeItem('token')
+    localStorage.removeItem('user')
   }
 
   const updateBalance = (newBalance: number) => {
     setUser((prevUser) =>
       prevUser ? { ...prevUser, balance: newBalance } : null
     )
+    const updatedUser = { ...user, balance: newBalance }
+    localStorage.setItem('user', JSON.stringify(updatedUser))
   }
 
   return (

@@ -2,14 +2,12 @@ import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Button } from './ui/button'
 import { ScrollArea } from './ui/scroll-area'
-import { Users, ShoppingBag, Tag, CreditCard, ShoppingCart } from 'lucide-react'
+import { Users, ShoppingBag, Tag } from 'lucide-react'
 
 const navItems = [
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'Products', href: '/admin/products', icon: ShoppingBag },
   { name: 'Promocodes', href: '/admin/promo-codes', icon: Tag },
-  { name: 'Transactions', href: '/admin/transactions', icon: CreditCard },
-  { name: 'Purchases', href: '/admin/purchases', icon: ShoppingCart },
 ]
 
 const Sidebar: React.FC = () => {
@@ -17,7 +15,7 @@ const Sidebar: React.FC = () => {
 
   return (
     <div className="pb-12 w-64">
-      <div className="space-y-4 py-4">
+      <div className="space-y-4 ">
         <div className="px-3 py-2">
           <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
             Dashboard
@@ -33,10 +31,7 @@ const Sidebar: React.FC = () => {
                   }
                   className="w-full justify-start"
                 >
-                  <Link to={item.href}>
-                    <item.icon className="mr-2 h-4 w-4" />
-                    {item.name}
-                  </Link>
+                  <Link to={item.href}>{item.name}</Link>
                 </Button>
               ))}
             </div>

@@ -2,9 +2,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { BrowserRouter, Routes, Route } from 'react-router'
-import ProductDetail from './components/ProductDetail.tsx'
 import Layout from './components/Layout.tsx'
-import Dashboard from './components/DashboardComponents/Dashboard.tsx'
 import Products from './components/DashboardComponents/Products.tsx'
 import PromocodesManager from './components/DashboardComponents/PromoCodes.tsx'
 import Purchases from './components/DashboardComponents/Purchase.tsx'
@@ -18,12 +16,14 @@ import Cart from './pages/Cart.tsx'
 import ProtectedRoute from './components/ProtectedRoutes.tsx'
 import UserLogs from './pages/UserLogs.tsx'
 import Reviews from './pages/Reviews.tsx'
+import CategoryProducts from './pages/CategoryProducts.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <UserProvider>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />} />
+        <Route path="/category/:category" element={<CategoryProducts />} />
         <Route path="/reviews" element={<Reviews />} />
         <Route path="/logs" element={<UserLogs />} />
         <Route
@@ -42,7 +42,6 @@ createRoot(document.getElementById('root')!).render(
             </ProtectedRoute>
           }
         />
-        {/* <Route path="product/:id" element={<ProductDetail />} /> */}
         <Route path="auth/login" element={<LoginPage />} />
         <Route path="auth/register" element={<RegisterPage />} />
         <Route
@@ -53,7 +52,6 @@ createRoot(document.getElementById('root')!).render(
             </ProtectedRoute>
           }
         >
-          <Route path="dashboard" element={<Dashboard />} />
           <Route path="products" element={<Products />} />
           <Route path="promo-codes" element={<PromocodesManager />} />
           <Route path="transactions" element={<Transactions />} />

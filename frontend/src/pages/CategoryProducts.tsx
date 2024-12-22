@@ -1,20 +1,25 @@
 import { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
 import { Card, CardContent, CardTitle } from '@/components/ui/card'
-import { Skeleton } from './ui/skeleton'
+import { Skeleton } from '../components/ui/skeleton'
 import { Product } from '@/types'
 import { Button } from '@/components/ui/button'
 import { useUser } from '@/contexts/AuthContext'
+import Navbar from '@/components/ui/Navbar'
 
-export default function ProductList() {
+export default function CategoryProducts() {
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { user } = useUser()
+  const { category } = useParams<{ category: string }>()
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch(`http://localhost:4000/products/`)
+        const response = await fetch(
+          `http://localhost:4000/products?category=${category}`
+        )
 
         if (!response.ok) {
           throw new Error('Failed to fetch products')
@@ -39,7 +44,7 @@ export default function ProductList() {
     }
 
     fetchProducts()
-  }, [])
+  }, [category])
 
   const addToCart = async (productId: string) => {
     if (!user) {
@@ -68,7 +73,9 @@ export default function ProductList() {
     }
   }
 
-  console.log(JSON.stringify(products))
+  function isVideo(mediaUrl: string) {
+    return mediaUrl.endsWith('.webm') ? true : false
+  }
 
   if (isLoading) {
     return (
@@ -91,48 +98,55 @@ export default function ProductList() {
   }
 
   if (products.length === 0) {
-    return <div className="text-center">No products found</div>
-  }
-
-  function isVideo(mediaUrl: string) {
-    return mediaUrl.endsWith('.webm') ? true : false
+    return (
+      <div className="text-center">No products found for this category</div>
+    )
   }
 
   return (
-    <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-5 pl-32 pr-32">
-      {products.map((product) => (
-        <Card key={product.id} className="flex items-center">
-          <CardContent className="p-4">
-            <div className="relative h-48 mb-4 overflow-hidden ">
-              {isVideo(product.imageUrl) ? (
-                <video
-                  src={product.imageUrl}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="w-full h-full "
-                >
-                  Your browser does not support the video tag.
-                </video>
-              ) : (
-                <img
-                  src={product.imageUrl}
-                  alt={product.name}
-                  className="w-full h-full object-contain"
-                />
-              )}
-            </div>
-            <CardTitle className="text-center mb-2">{product.name}</CardTitle>
-            <p className="text-center font-bold mb-4">${product.price}</p>
-            <div className="flex justify-center">
-              <Button className="mb-2" onClick={() => addToCart(product.id)}>
-                Add to Cart
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+    <>
+      <Navbar />
+      <div className="container mt-20 mx-32">
+        <h1 className="text-3xl font-bold mb-8 text-center">
+          {category} Products
+        </h1>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {products.map((product) => (
+            <Card
+              key={product.id}
+              className="bg-[url('https://store.supercell.com/_next/static/media/brawlercard-hero-bg.99024bb5.png')]"
+            >
+              <CardContent className="p-4">
+                <div className="relative h-48 mb-4 overflow-hidden ">
+                  {isVideo(product.imageUrl) ? (
+                    <video
+                      src={product.imageUrl}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full "
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  ) : (
+                    <img
+                      src={product.imageUrl}
+                      alt={product.name}
+                      className="w-full h-full object-contain"
+                    />
+                  )}
+                </div>
+                <CardTitle className="mb-2">{product.name}</CardTitle>
+                <p className="font-bold mb-4">${product.price}</p>
+                <Button onClick={() => addToCart(product.id)}>
+                  Add to Cart
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </>
   )
 }

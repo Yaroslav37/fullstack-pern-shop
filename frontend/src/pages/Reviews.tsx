@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react'
 import { useUser } from '@/contexts/AuthContext'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Star } from 'lucide-react'
 import axios from 'axios'
+import Navbar from '@/components/ui/Navbar'
 
 interface Review {
   rating: number
@@ -79,8 +79,11 @@ export default function Reviews() {
   )
 
   return (
-    <div className="container mx-auto py-12 px-4">
-      <h1 className="text-3xl font-bold text-center mb-8">Customer Reviews</h1>
+    <div className="container mx-auto py-12 px-32">
+      <Navbar />
+      <h1 className="text-3xl font-bold text-center mb-8 pt-10">
+        Customer Reviews
+      </h1>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
         {displayedReviews.map((review, index) => (
@@ -136,27 +139,27 @@ export default function Reviews() {
       </div>
 
       {canReview && (
-        <div className="max-w-md mx-auto">
+        <div className="max-w-md pt-10">
           <h2 className="text-2xl font-bold mb-4">Leave a Review</h2>
           <form onSubmit={handleSubmitReview} className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1">Rating</label>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((value) => (
-                  <button
+                  <Button
                     key={value}
-                    type="button"
                     onClick={() => setRating(value)}
-                    className="focus:outline-none"
+                    className="w-full"
+                    variant="none"
                   >
                     <Star
                       className={`h-6 w-6 ${
                         value <= rating
-                          ? 'fill-primary text-primary'
+                          ? 'fill-orange-400 text-primary'
                           : 'fill-muted text-muted-foreground'
                       }`}
                     />
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>

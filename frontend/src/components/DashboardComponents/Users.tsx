@@ -28,8 +28,21 @@ const Users: React.FC = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/users')
-      setUsers(response.data.users)
+      const response = await axios.get('http://localhost:4000/users', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      })
+      console.log(response)
+      const new_users: User[] = []
+      response.data.map((user: any) => {
+        const new_user = {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          role: user.role_id === 1 ? 'admin' : 'user',
+        }
+        new_users.push(new_user)
+      })
+      setUsers(new_users)
       setIsLoading(false)
     } catch (error) {
       setError('Ошибка получения пользователей')
@@ -70,7 +83,7 @@ const Users: React.FC = () => {
     <div className="space-y-4">
       <h1 className="text-3xl font-bold">Управление пользователями</h1>
       <Table>
-        <TableCaption>Список пользователей</TableCaption>
+        <TableCaption>User List</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead>ID</TableHead>
@@ -88,7 +101,7 @@ const Users: React.FC = () => {
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.role}</TableCell>
               <TableCell>
-                {user.role === 'User' && (
+                {user.role === 'user' && (
                   <Button onClick={() => handleAssignAdmin(user.id)}>
                     Make admin
                   </Button>

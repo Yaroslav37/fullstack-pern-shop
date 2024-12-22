@@ -2,10 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { Promocode, NewPromocode } from '../../types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { PromocodeCheckbox } from '@/components/ui/promocode-checkbox'
 import {
   Table,
   TableBody,
@@ -35,28 +33,34 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 
+export interface Promocode {
+  id: number
+  code: string
+  amount: number
+  expiration_date: string
+  activation_limit: number
+  activation_count: number
+}
+
+export interface NewPromocode {
+  code: string
+  amount: number
+  expiration_date: string
+  activation_limit: number
+}
+
 const PromocodesManager: React.FC = () => {
   const [promocodes, setPromocodes] = useState<Promocode[]>([])
   const [newPromocode, setNewPromocode] = useState<NewPromocode>({
     code: '',
-    discount: 0,
+    amount: 0,
     expiration_date: '',
-    is_active: false,
+    activation_limit: 1,
   })
   const [editingPromocode, setEditingPromocode] = useState<Promocode | null>(
     null
   )
-
-  const handleCheckboxChange = (checked: boolean) => {
-    if (editingPromocode) {
-      setEditingPromocode({ ...editingPromocode, is_active: checked })
-    } else {
-      setNewPromocode({ ...newPromocode, is_active: checked })
-    }
-  }
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [deleteConfirmation, setDeleteConfirmation] =
-    useState<Promocode | null>(null)
 
   useEffect(() => {
     fetchPromocodes()
@@ -74,9 +78,11 @@ const PromocodesManager: React.FC = () => {
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type } = e.target
+    const { name, value } = e.target
     const inputValue =
-      type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+      name === 'amount' || name === 'activation_limit'
+        ? parseFloat(value)
+        : value
 
     if (editingPromocode) {
       setEditingPromocode({ ...editingPromocode, [name]: inputValue })
@@ -98,9 +104,9 @@ const PromocodesManager: React.FC = () => {
         await axios.post('http://localhost:4000/promocodes', newPromocode)
         setNewPromocode({
           code: '',
-          discount: 0,
+          amount: 0,
           expiration_date: '',
-          is_active: true,
+          activation_limit: 1,
         })
       }
       fetchPromocodes()
@@ -113,11 +119,6 @@ const PromocodesManager: React.FC = () => {
   const startEditing = (promocode: Promocode) => {
     setEditingPromocode(promocode)
     setIsDialogOpen(true)
-  }
-
-  const cancelEditing = () => {
-    setEditingPromocode(null)
-    setIsDialogOpen(false)
   }
 
   const deletePromocode = async (promocode: Promocode) => {
@@ -157,14 +158,14 @@ const PromocodesManager: React.FC = () => {
                 />
               </div>
               <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="discount">Discount</Label>
+                <Label htmlFor="amount">Amount</Label>
                 <Input
-                  id="discount"
-                  name="discount"
+                  id="amount"
+                  name="amount"
                   type="number"
-                  value={editingPromocode?.discount || newPromocode.discount}
+                  value={editingPromocode?.amount || newPromocode.amount}
                   onChange={handleInputChange}
-                  placeholder="Enter discount"
+                  placeholder="Enter amount"
                   required
                 />
               </div>
@@ -182,12 +183,19 @@ const PromocodesManager: React.FC = () => {
                   required
                 />
               </div>
-              <div className="flex items-center space-x-2">
-                <PromocodeCheckbox
-                  isActive={
-                    editingPromocode?.is_active || newPromocode.is_active
+              <div className="flex flex-col space-y-1.5">
+                <Label htmlFor="activation_limit">Activation Limit</Label>
+                <Input
+                  id="activation_limit"
+                  name="activation_limit"
+                  type="number"
+                  value={
+                    editingPromocode?.activation_limit ||
+                    newPromocode.activation_limit
                   }
-                  onChange={handleCheckboxChange}
+                  onChange={handleInputChange}
+                  placeholder="Enter activation limit"
+                  required
                 />
               </div>
             </div>
@@ -204,9 +212,10 @@ const PromocodesManager: React.FC = () => {
         <TableHeader>
           <TableRow>
             <TableHead>Code</TableHead>
-            <TableHead>Discount</TableHead>
+            <TableHead>Amount</TableHead>
             <TableHead>Expiration Date</TableHead>
-            <TableHead>Is Active</TableHead>
+            <TableHead>Activation Limit</TableHead>
+            <TableHead>Activation Count</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -214,11 +223,12 @@ const PromocodesManager: React.FC = () => {
           {promocodes.map((promocode) => (
             <TableRow key={promocode.id}>
               <TableCell>{promocode.code}</TableCell>
-              <TableCell>{promocode.discount}</TableCell>
+              <TableCell>{promocode.amount}</TableCell>
               <TableCell>
                 {new Date(promocode.expiration_date).toLocaleDateString()}
               </TableCell>
-              <TableCell>{promocode.is_active ? 'Yes' : 'No'}</TableCell>
+              <TableCell>{promocode.activation_limit}</TableCell>
+              <TableCell>{promocode.activation_count}</TableCell>
               <TableCell>
                 <Button
                   variant="outline"
