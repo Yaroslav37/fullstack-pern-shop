@@ -15,8 +15,21 @@ DROP TRIGGER IF EXISTS log_user_balance_update ON "user";
 -- Удаление функций
 DROP FUNCTION IF EXISTS log_action;
 DROP FUNCTION IF EXISTS apply_promocode;
-DROP FUNCTION IF EXISTS has_purchase;
+DROP FUNCTION IF EXISTS can_review;
 DROP FUNCTION IF EXISTS add_review;
+
+-- Удаление представлений
+DROP VIEW IF EXISTS product_view;
+
+-- Удаление зависимостей
+ALTER TABLE cart_product DROP CONSTRAINT IF EXISTS cart_product_cart_id_fkey;
+ALTER TABLE cart_product DROP CONSTRAINT IF EXISTS cart_product_product_id_fkey;
+ALTER TABLE cart DROP CONSTRAINT IF EXISTS cart_user_id_fkey;
+ALTER TABLE "order" DROP CONSTRAINT IF EXISTS order_user_id_fkey;
+ALTER TABLE transaction DROP CONSTRAINT IF EXISTS transaction_user_id_fkey;
+ALTER TABLE review DROP CONSTRAINT IF EXISTS review_user_id_fkey;
+ALTER TABLE promocode_activation DROP CONSTRAINT IF EXISTS promocode_activation_promocode_id_fkey;
+ALTER TABLE promocode_activation DROP CONSTRAINT IF EXISTS promocode_activation_user_id_fkey;
 
 -- Удаление таблиц
 DROP TABLE IF EXISTS log;

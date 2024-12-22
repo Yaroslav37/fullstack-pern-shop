@@ -14,14 +14,16 @@ router.get('/can-review', authenticateToken, async (req, res) => {
 
   try {
     const query = `
-      SELECT has_purchase($1) AS can_review;
+      SELECT can_review($1) AS can_review;
     `
     const values = [userId]
     const result = await client.query(query, values)
 
     if (result.rows[0].can_review) {
       res.status(200).json({ canReview: true })
+      console.log('fds')
     } else {
+      console.log('fds2')
       res.status(200).json({ canReview: false })
     }
   } catch (error) {

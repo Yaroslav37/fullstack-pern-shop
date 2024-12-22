@@ -65,15 +65,37 @@ router.get('/games', async (req, res) => {
   }
 })
 
-// Получение всех товаров
+const formatCategory = (category) => {
+  return category
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
 router.get('/products', async (req, res) => {
+  const { category } = req.query
+
   try {
-    const query = `
-      SELECT p.id, p.name, g.name as game, p.description, p.price, p.stock, p.image_url
-      FROM product p
-      JOIN game g ON p.game_id = g.id;
-    `
-    const result = await client.query(query)
+    let query
+    let values = []
+
+    if (category) {
+      query = `
+        SELECT p.id, p.name, g.name as game, p.description, p.price, p.stock, p.image_url
+        FROM product p
+        JOIN game g ON p.game_id = g.id
+        WHERE g.name = $1;
+      `
+      values = [category]
+    } else {
+      query = `
+        SELECT p.id, p.name, g.name as game, p.description, p.price, p.stock, p.image_url
+        FROM product p
+        JOIN game g ON p.game_id = g.id;
+      `
+    }
+
+    const result = await client.query(query, values)
 
     res.status(200).json({ products: result.rows })
   } catch (error) {

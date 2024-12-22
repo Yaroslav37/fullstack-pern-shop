@@ -114,37 +114,61 @@ CREATE INDEX idx_order_user_id ON "order"(user_id);
 CREATE INDEX idx_transaction_user_id ON transaction(user_id); -- Добавлен индекс для user_id в таблице transaction
 CREATE INDEX idx_review_user_id ON review(user_id);
 
--- Функция для проверки наличия хотя бы одной покупки у пользователя
-CREATE OR REPLACE FUNCTION has_purchase(user_id INT)
+CREATE OR REPLACE VIEW product_view AS
+SELECT 
+    p.id AS product_id,
+    p.name AS product_name,
+    g.name AS game_name,
+    p.description AS product_description,
+    p.price AS product_price,
+    p.stock AS product_stock,
+    p.image_url AS product_image_url
+FROM 
+    product p
+JOIN 
+    game g ON p.game_id = g.id;
+
+
+CREATE OR REPLACE FUNCTION can_review(input_user_id INT)
 RETURNS BOOLEAN AS $$
 DECLARE
     purchase_count INT;
+    review_count INT;
 BEGIN
+    -- Проверка наличия хотя бы одной покупки
     SELECT COUNT(*)
     INTO purchase_count
     FROM "order"
-    WHERE user_id = user_id;
+    WHERE "order".user_id = input_user_id; -- Уточнение таблицы и использование нового имени параметра
 
-    RETURN purchase_count > 0;
+    -- Проверка наличия других отзывов
+    SELECT COUNT(*)
+    INTO review_count
+    FROM review
+    WHERE review.user_id = input_user_id; -- Уточнение таблицы и использование нового имени параметра
+
+    -- Пользователь может оставить отзыв, если у него есть хотя бы одна покупка и нет других отзывов
+    RETURN purchase_count > 0 AND review_count = 0;
 END;
 $$ LANGUAGE plpgsql;
 
--- Функция для добавления отзыва о магазине
-CREATE OR REPLACE FUNCTION add_review(user_id INT, rating INT, comment TEXT)
+CREATE OR REPLACE FUNCTION add_review(input_user_id INT, rating INT, comment TEXT)
 RETURNS TEXT AS $$
 BEGIN
-    -- Проверка наличия хотя бы одной покупки
-    IF NOT has_purchase(user_id) THEN
-        RETURN 'Пользователь не имеет покупок в магазине.';
+    -- Проверка возможности оставить отзыв
+    IF NOT can_review(input_user_id) THEN
+        RETURN 'Пользователь не может оставить отзыв.';
     END IF;
 
     -- Добавление отзыва
     INSERT INTO review (user_id, rating, comment)
-    VALUES (user_id, rating, comment);
+    VALUES (input_user_id, rating, comment); -- Использование нового имени параметра
 
     RETURN 'Отзыв успешно добавлен.';
 END;
 $$ LANGUAGE plpgsql;
+
+
 
 -- Функция для применения промокода
 CREATE OR REPLACE FUNCTION apply_promocode(input_user_id INT, promo_code VARCHAR)

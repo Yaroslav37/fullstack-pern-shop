@@ -26,19 +26,19 @@ router.get('/promocodes', async (req, res) => {
  * @access Public
  */
 router.post('/promocodes', async (req, res) => {
-  const { code, discount, expiration_date, is_active } = req.body
+  const { code, amount, expiration_date, activation_limit } = req.body
 
-  if (!code || !discount || !expiration_date) {
+  if (!code || !amount || !expiration_date || !activation_limit) {
     return res.status(400).json({ error: 'Все поля обязательны.' })
   }
 
   try {
     const query = `
-      INSERT INTO promocode (code, discount, expiration_date, is_active)
+      INSERT INTO promocode (code, amount, expiration_date, activation_limit)
       VALUES ($1, $2, $3, $4)
       RETURNING *;
     `
-    const values = [code, discount, expiration_date, is_active || true]
+    const values = [code, amount, expiration_date, activation_limit]
     const result = await client.query(query, values)
 
     res
@@ -57,20 +57,20 @@ router.post('/promocodes', async (req, res) => {
  */
 router.put('/promocodes/:id', async (req, res) => {
   const { id } = req.params
-  const { code, discount, expiration_date, is_active } = req.body
+  const { code, amount, expiration_date, activation_limit } = req.body
 
-  if (!code || !discount || !expiration_date) {
+  if (!code || !amount || !expiration_date || !activation_limit) {
     return res.status(400).json({ error: 'Все поля обязательны.' })
   }
 
   try {
     const query = `
       UPDATE promocode
-      SET code = $1, discount = $2, expiration_date = $3, is_active = $4
+      SET code = $1, amount = $2, expiration_date = $3, activation_limit = $4
       WHERE id = $5
       RETURNING *;
     `
-    const values = [code, discount, expiration_date, is_active, id]
+    const values = [code, amount, expiration_date, activation_limit, id]
     const result = await client.query(query, values)
 
     if (result.rowCount === 0) {

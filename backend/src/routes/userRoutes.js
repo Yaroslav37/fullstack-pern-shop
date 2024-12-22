@@ -193,4 +193,29 @@ router.post('/apply-promocode', authenticateToken, async (req, res) => {
   }
 })
 
+/**
+ * @route GET /users
+ * @desc Получение всех пользователей
+ * @access Private
+ */
+router.get('/', authenticateToken, async (req, res) => {
+  try {
+    const query = `
+      SELECT id, username, email, role_id, balance, created_at
+      FROM "user"
+      ORDER BY created_at DESC;
+    `
+    const result = await client.query(query)
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Пользователи не найдены.' })
+    }
+
+    res.status(200).json(result.rows)
+  } catch (error) {
+    console.error('Ошибка получения пользователей:', error.message)
+    res.status(500).json({ error: 'Ошибка сервера.' })
+  }
+})
+
 module.exports = router

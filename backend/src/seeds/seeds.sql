@@ -26,8 +26,16 @@ ON CONFLICT DO NOTHING;
 INSERT INTO product (name, game_id, description, price, stock, image_url)
 VALUES
     ('Fang', 1, 'Description for Product One', 7.99, 100, 'https://game-assets.store.supercell.com/brawlstars/a92dc117-27a1-488a-8464-33e25028a1cd.webm'),
-    ('CyberBea', 2, 'Description for Product Two', 3.99, 200, 'https://game-assets.store.supercell.com/brawlstars/9f372224-ae68-4307-8e79-7a8887f9945a.webm'),
-    ('Shade', 2, 'Description for Product Two', 17.99, 200, 'https://game-assets.store.supercell.com/brawlstars/d2bebe42-48be-4df5-950e-461ba0b1a61d.webm')
+    ('CyberBea', 1, 'Description for Product Two', 3.99, 200, 'https://game-assets.store.supercell.com/brawlstars/9f372224-ae68-4307-8e79-7a8887f9945a.webm'),
+    ('Shade', 1, 'Description for Product Two', 17.99, 200, 'https://game-assets.store.supercell.com/brawlstars/d2bebe42-48be-4df5-950e-461ba0b1a61d.webm'),
+    ('Woody Colt', 1, 'Description ', 11.99, 200, 'https://game-assets.store.supercell.com/brawlstars/5505ad03-b991-49fe-a965-986b754f4a13.webm'),
+    ('Jessy', 1, 'Description ', 11.99, 200, 'https://game-assets.store.supercell.com/brawlstars/07ec15ea-62a6-42d8-a135-a72e5c3416da.webm')
+    -- ('Woody Colt', 1, 'Description ', 11.99, 200, ''),
+    -- ('Woody Colt', 1, 'Description ', 11.99, 200, ''),
+    -- ('Woody Colt', 1, 'Description ', 11.99, 200, ''),
+    -- ('Woody Colt', 1, 'Description ', 11.99, 200, ''),
+    -- ('Woody Colt', 1, 'Description ', 11.99, 200, ''),
+    -- ('Woody Colt', 1, 'Description ', 11.99, 200, ''),
 ON CONFLICT DO NOTHING;
 
 -- Вставка данных в таблицу промокодов

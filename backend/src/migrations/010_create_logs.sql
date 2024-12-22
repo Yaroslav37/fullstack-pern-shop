@@ -1,6 +1,0 @@
-CREATE TABLE log (
-    id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES "user"(id),
-    action TEXT NOT NULL,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
